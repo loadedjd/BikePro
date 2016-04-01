@@ -18,7 +18,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         mapView.showsUserLocation = true
-        var timer = NSTimer.scheduledTimerWithTimeInterval(0.4, target: self, selector: #selector(ViewController.updateGui), userInfo: nil, repeats: true)
+        var timer = NSTimer.scheduledTimerWithTimeInterval(0.1, target: self, selector: #selector(ViewController.updateGui), userInfo: nil, repeats: true)
         mapView.setUserTrackingMode(MKUserTrackingMode.FollowWithHeading, animated: true)
     }
 
