@@ -20,6 +20,14 @@ class locationLogic: NSObject, CLLocationManagerDelegate {
     var distanceTraveled = Double()
     var hasFoundLastLocation = false
     var formattedDistanceString = NSString()
+    var currentHeading = CLHeading()
+    var currentLocationDirection = CLLocationDirection()
+    var polyLine = MKPolyline()
+    var coordinateArray = [CLLocationCoordinate2D]()
+    var speedArray = [Double]()
+    var avgSpeed = 0.0
+    var speedCount = 0
+    var formattedAvgSpeedString = NSString()
     
     override init() {
         super.init()
@@ -32,12 +40,21 @@ class locationLogic: NSObject, CLLocationManagerDelegate {
     func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         self.currentLocation = locations.last!
         self.currentSpeed = locations.last!.speed * 2.2369362920544
+        self.speedArray.append(self.currentSpeed)
+        self.speedCount += 1
         determineIfStationary()
         determineDistance()
+        determineAvgSpeed(self.speedArray)
+        coordinateArray = [self.lastLocation.coordinate, self.currentLocation.coordinate]
+        self.polyLine = MKPolyline(coordinates: &self.coordinateArray, count: self.coordinateArray.count)
+    }
+    
+    func locationManager(manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
+        self.currentLocationDirection = newHeading.trueHeading
     }
     
     func determineIfStationary() {
-        if self.currentSpeed * 2.2369362920544 < 1 {
+        if self.currentSpeed * 2.2369362920544 < 2 {
             self.isStationary = true
         }
         
@@ -60,5 +77,14 @@ class locationLogic: NSObject, CLLocationManagerDelegate {
             self.formattedDistanceString = NSString(format: "%.1f", self.distanceTraveled)
         }
         
+    }
+    
+    func determineAvgSpeed(array: [Double]) -> Double{
+        var sum = 0.0
+        for speed in array {
+            sum+=speed
+        }
+        self.formattedAvgSpeedString = NSString(format: "%.1f", sum/Double(self.speedCount))
+        return sum/Double(self.speedCount)
     }
 }
