@@ -15,8 +15,11 @@ class ViewController: UIViewController, MKMapViewDelegate {
     var mapCamera = MKMapCamera()
     @IBOutlet weak var distanceLabel: UILabel!
     @IBOutlet weak var speedLabel: UILabel!
-    
     let locationObject = locationLogic()
+    var polyLine = MKPolyline()
+    
+    
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,13 +39,24 @@ class ViewController: UIViewController, MKMapViewDelegate {
     }
     
     func mapView(mapView: MKMapView, rendererForOverlay overlay: MKOverlay) -> MKOverlayRenderer {
-            let renderer = MKPolylineRenderer(overlay: overlay)
-            renderer.strokeColor = UIColor.blueColor()
-            renderer.lineWidth = 4
-            return renderer
+        let renderer = MKPolylineRenderer(overlay: overlay)
 
         
+        if self.locationObject.currentSpeed >= 1.0 && self.locationObject.currentSpeed <= 5.0 {
+            renderer.strokeColor = UIColor.redColor()
+        }
         
+        if self.locationObject.currentSpeed > 5.0 && self.locationObject.currentSpeed <= 10.0 {
+            renderer.strokeColor = UIColor.yellowColor()
+        }
+        
+        if self.locationObject.currentSpeed > 10.0 {
+            renderer.strokeColor = UIColor.greenColor()
+        }
+        
+            renderer.lineWidth = 4
+            return renderer
+    
     }
     
     func updateGui() {
@@ -125,7 +139,8 @@ class ViewController: UIViewController, MKMapViewDelegate {
     }
     
     func updatePolyLine() {
-        mapView.addOverlay(self.locationObject.polyLine)
+        self.polyLine = MKPolyline(coordinates: &self.locationObject.coordinateArray, count: self.locationObject.coordinateArray.count)
+        mapView.addOverlay(self.polyLine)
     }
 }
 

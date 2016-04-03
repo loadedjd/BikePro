@@ -22,7 +22,6 @@ class locationLogic: NSObject, CLLocationManagerDelegate {
     var formattedDistanceString = NSString()
     var currentHeading = CLHeading()
     var currentLocationDirection = CLLocationDirection()
-    var polyLine = MKPolyline()
     var coordinateArray = [CLLocationCoordinate2D]()
     var speedArray = [Double]()
     var avgSpeed = 0.0
@@ -35,18 +34,22 @@ class locationLogic: NSObject, CLLocationManagerDelegate {
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.requestWhenInUseAuthorization()
         locationManager.startUpdatingLocation()
+        
+        formattedAvgSpeedString = NSString(string: "0") //initiate to 0 at beginning so user doesnt see nan at info press
     }
     
     func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         self.currentLocation = locations.last!
         self.currentSpeed = locations.last!.speed * 2.2369362920544
-        self.speedArray.append(self.currentSpeed)
-        self.speedCount += 1
+        if !(locations.last!.speed * 2.2369362920544 < 1.0) {
+            self.speedArray.append(self.currentSpeed)
+            self.speedCount += 1
+        }
+                
         determineIfStationary()
         determineDistance()
         determineAvgSpeed(self.speedArray)
         coordinateArray = [self.lastLocation.coordinate, self.currentLocation.coordinate]
-        self.polyLine = MKPolyline(coordinates: &self.coordinateArray, count: self.coordinateArray.count)
     }
     
     func locationManager(manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
@@ -80,6 +83,10 @@ class locationLogic: NSObject, CLLocationManagerDelegate {
     }
     
     func determineAvgSpeed(array: [Double]) -> Double{
+        if array.count == 0 { //Keeps From Setting String to Nan from empty speed array
+            self.formattedAvgSpeedString = NSString(string: "0.0")
+            return 0.0
+        }
         var sum = 0.0
         for speed in array {
             sum+=speed
